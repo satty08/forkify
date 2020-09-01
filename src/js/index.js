@@ -26,12 +26,18 @@ const controlSearch = async () => {
         searchView.clearPrevResult();
         renderLoader(elements.searchRes)
 
-        //Search for recipes
-        clearLoader();
-        await state.search.getResults();
+        try {
+            //Search for recipes
+            clearLoader();
+            await state.search.getResults();
 
-        // render results on UI
-        searchView.renderResults(state.search.result);
+            // render results on UI
+            searchView.renderResults(state.search.result);
+            
+        } catch (error) {
+            alert('Something wrong with search...')
+            clearLoader();
+        }
     }
 }
 
@@ -52,6 +58,38 @@ elements.searchResPages.addEventListener('click', e => {
 /* SEARCH CONTROLLER
 */
 
-const r = new Recipe(47746);
-r.getRecipe();
-console.log(r);
+const controlRecipe = async () => {
+    //Get ID from url
+    const id = window.location.hash.replace('#', '');
+    console.log(id);
+
+    if (id) {
+        //Prepare UI for changes
+
+        //Create new recipe object
+        state.recipe = new Recipe(id);
+
+        try {
+            //Get recipe data and parse ingredients
+            await state.recipe.getRecipe();
+            state.recipe.parseIngredients();
+
+            //Calculate servings and time
+            state.recipe.calcTime();
+            state.recipe.calcServings();
+
+            //Render Recipe
+            console.log(state.recipe);
+            
+        } catch (error) {
+            alert('Error Processing Recipe!');
+        }
+
+    }
+}
+
+//window.addEventListener('hashchange', controlRecipe);
+//window.addEventListener('load', controlRecipe);
+
+['hashchange', 'load'].forEach(event => window.addEventListener(event, controlRecipe));
+
